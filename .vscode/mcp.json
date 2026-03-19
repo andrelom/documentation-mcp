@@ -2,7 +2,7 @@
   "servers": {
     "fabricjs-mcp": {
       "type": "http",
-      "url": "http://localhost:3000/mcp"
+      "url": "http://documentation-mcp.localhost/mcp"
     }
   }
 }
