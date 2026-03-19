@@ -1,7 +1,7 @@
-import { z } from 'zod'
 import type { FastMCP } from 'fastmcp'
+import { z } from 'zod'
 import type { ProviderServices } from '../../core/provider.js'
-import { KNOWN_CLASSES, buildApiUrl } from './fabricjs.config.js'
+import { buildApiUrl } from './fabricjs.config.js'
 
 /**
  * Generates a Table of Contents from level-2 Markdown headings.
@@ -36,7 +36,7 @@ export function registerFabricJsTools(server: FastMCP, services: ProviderService
     description:
       `ALWAYS USE THIS TOOL when you need to list all properties, methods, or constructor signatures of a Fabric.js class. ` +
       `Pass either a full URL (https://fabricjs.com/api/classes/canvas/) or just the class name (e.g. "Canvas"). ` +
-      `Known classes: ${KNOWN_CLASSES.join(', ')}. ` +
+      `Any class name found in the index is accepted — use fabricjs_list_index or fabricjs_search to discover available classes. ` +
       `Returns the full TypeDoc API reference page as Markdown with a Table of Contents.`,
     parameters: z.object({
       target: z

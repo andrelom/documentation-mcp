@@ -1,4 +1,4 @@
-import type { ProviderSection, ExtractionConfig } from '../../core/provider.js'
+import type { ExtractionConfig, ProviderSection } from '../../core/provider.js'
 
 const BASE_URL = 'https://fabricjs.com'
 
@@ -14,46 +14,6 @@ export const EXTRACTION: ExtractionConfig = {
   baseUrl: BASE_URL,
   detectSection: (url: string) => (url.includes('/api/') ? 'api' : 'docs'),
 }
-
-/**
- * Known Fabric.js classes that can be used as shorthand targets
- * (e.g. `"Canvas"` instead of the full URL).
- */
-export const KNOWN_CLASSES = [
-  'ActiveSelection',
-  'BaseBrush',
-  'Canvas',
-  'Circle',
-  'CircleBrush',
-  'Color',
-  'Control',
-  'Ellipse',
-  'FabricImage',
-  'FabricObject',
-  'FabricText',
-  'Gradient',
-  'Group',
-  'IText',
-  'InteractiveFabricObject',
-  'Intersection',
-  'LayoutManager',
-  'Line',
-  'Observable',
-  'Path',
-  'Pattern',
-  'PatternBrush',
-  'PencilBrush',
-  'Point',
-  'Polygon',
-  'Polyline',
-  'Rect',
-  'Shadow',
-  'SprayBrush',
-  'StaticCanvas',
-  'Textbox',
-  'Triangle',
-  'WebGLFilterBackend',
-] as const
 
 /** Builds a full API URL from a class name shorthand. */
 export function buildApiUrl(target: string): string {
