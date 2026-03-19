@@ -13,7 +13,7 @@ export const SECTIONS: ProviderSection[] = [
 
 /** HTML extraction settings for docs.sqlalchemy.org (Sphinx). */
 export const EXTRACTION: ExtractionConfig = {
-  contentSelector: 'div.body',
+  contentSelector: '#docs-body',
   baseUrl: BASE_URL,
   detectSection: (url: string) => {
     if (url.includes('/orm/')) return 'orm'

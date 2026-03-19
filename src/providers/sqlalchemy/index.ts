@@ -9,13 +9,7 @@ import {
   createSearchTool,
   createSectionSearchTool,
 } from '../../core/tool-factories.js'
-import {
-  BASE_URL,
-  EXTRACTION,
-  SECTIONS,
-  buildPageUrl,
-  classifyPage,
-} from './sqlalchemy.config.js'
+import { BASE_URL, EXTRACTION, SECTIONS, buildPageUrl, classifyPage } from './sqlalchemy.config.js'
 import { registerSqlAlchemyPrompts } from './sqlalchemy.prompts.js'
 import { registerSqlAlchemyTools } from './sqlalchemy.tools.js'
 
@@ -49,10 +43,20 @@ const sqlalchemyProvider: Provider = {
           const { openPage } = await import('../../infrastructure/scraper/browser.service.js')
           const page = await openPage(s.indexUrl)
           try {
-            // Sphinx sidebar uses div.sphinxsidebar or nav elements
-            const hrefs = await page.$$eval('div.sphinxsidebar a[href], nav a[href]', (anchors) =>
-              anchors.map((a) => a.getAttribute('href') ?? ''),
-            )
+            // Collect from all candidate containers; #docs-body has the fullest ToC via toctree-wrapper
+            const selectors = [
+              '#docs-body .toctree-wrapper a[href]',
+              '#docs-body a[href]',
+              'div.sphinxsidebar a[href]',
+              '#docs-sidebar-inner a[href]',
+            ]
+            const hrefs: string[] = []
+            for (const sel of selectors) {
+              const found = await page
+                .$$eval(sel, (anchors) => anchors.map((a) => a.getAttribute('href') ?? ''))
+                .catch(() => [] as string[])
+              hrefs.push(...found)
+            }
 
             const sectionBase = s.indexUrl.substring(0, s.indexUrl.lastIndexOf('/') + 1)
 
@@ -90,11 +94,16 @@ const sqlalchemyProvider: Provider = {
           const dom = new JSDOM(html)
           const doc = dom.window.document
 
-          // Sphinx sidebar: try sphinxsidebar first, fall back to nav
-          let anchors = doc.querySelectorAll<HTMLAnchorElement>('div.sphinxsidebar a[href]')
-          if (anchors.length === 0) {
-            anchors = doc.querySelectorAll<HTMLAnchorElement>('nav a[href]')
-          }
+          // Collect from all candidate containers; #docs-body has the fullest ToC via toctree-wrapper
+          const allAnchors = [
+            ...Array.from(
+              doc.querySelectorAll<HTMLAnchorElement>('#docs-body .toctree-wrapper a[href]'),
+            ),
+            ...Array.from(doc.querySelectorAll<HTMLAnchorElement>('#docs-body a[href]')),
+            ...Array.from(doc.querySelectorAll<HTMLAnchorElement>('div.sphinxsidebar a[href]')),
+            ...Array.from(doc.querySelectorAll<HTMLAnchorElement>('#docs-sidebar-inner a[href]')),
+          ]
+          const anchors = allAnchors
 
           // Section base is the directory containing the index page
           const sectionBase = s.indexUrl.substring(0, s.indexUrl.lastIndexOf('/') + 1)
