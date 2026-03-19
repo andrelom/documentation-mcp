@@ -48,8 +48,6 @@ services:
       - SCRAPER_DELAY_MS=250
       - SCRAPER_TIMEOUT_MS=15000
       - USE_PLAYWRIGHT=false
-    ports:
-      - '3000:3000'
     volumes:
       - ./docker/cache:/data/cache
     networks:
