@@ -1,6 +1,6 @@
 {
   "servers": {
-    "fabricjs-mcp": {
+    "documentation-mcp": {
       "type": "http",
       "url": "http://documentation-mcp.localhost/mcp"
     }
