@@ -16,6 +16,9 @@ services:
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=proxy
       - --entrypoints.web.address=:80
+      - --entrypoints.web.transport.respondingTimeouts.readTimeout=0
+      - --entrypoints.web.transport.respondingTimeouts.writeTimeout=0
+      - --entrypoints.web.transport.respondingTimeouts.idleTimeout=0
       - --accesslog.filepath=/logs/access.log
     environment:
       - DOCKER_API_VERSION=1.47
@@ -55,7 +58,10 @@ services:
       - traefik.enable=true
       - traefik.http.routers.documentation-mcp.rule=Host(`documentation-mcp.localhost`)
       - traefik.http.routers.documentation-mcp.entrypoints=web
+      - traefik.http.routers.documentation-mcp.middlewares=documentation-mcp-streaming
       - traefik.http.services.documentation-mcp.loadbalancer.server.port=3000
+      - traefik.http.services.documentation-mcp.loadbalancer.responseForwarding.flushInterval=1ms
+      - traefik.http.middlewares.documentation-mcp-streaming.headers.customResponseHeaders.X-Accel-Buffering=no
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
       interval: 30s
