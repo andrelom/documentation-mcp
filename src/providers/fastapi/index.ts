@@ -9,7 +9,13 @@ import {
   createSearchTool,
   createSectionSearchTool,
 } from '../../core/tool-factories.js'
-import { BASE_URL, EXTRACTION, SECTIONS, buildReferenceUrl, classifyPage } from './fastapi.config.js'
+import {
+  BASE_URL,
+  EXTRACTION,
+  SECTIONS,
+  buildReferenceUrl,
+  classifyPage,
+} from './fastapi.config.js'
 import { registerFastApiPrompts } from './fastapi.prompts.js'
 import { registerFastApiTools } from './fastapi.tools.js'
 
@@ -61,8 +67,9 @@ const fastapiProvider: Provider = {
             await page.close()
           }
         } else {
-          // FastAPI (Material for MkDocs) may use relative URLs in nav,
-          // so we use a custom discovery approach that handles both formats
+          // FastAPI (Material for MkDocs) uses relative hrefs like "fastapi/", "apirouter/"
+          // in the nav — they don't contain the section prefix, so we must select all nav
+          // anchors and resolve each href against the index URL, then filter by prefix.
           const { httpFetchPage } = await import('../../infrastructure/scraper/http.service.js')
           const { JSDOM } = await import('jsdom')
 
@@ -70,11 +77,8 @@ const fastapiProvider: Provider = {
           const dom = new JSDOM(html)
           const doc = dom.window.document
 
-          // Material for MkDocs uses nav elements with nested links
-          // Try both absolute and relative href patterns
-          const anchors = doc.querySelectorAll<HTMLAnchorElement>(
-            `nav a[href*="${s.urlPrefix}"]`,
-          )
+          const anchors = doc.querySelectorAll<HTMLAnchorElement>('nav a[href]')
+          const sectionBase = s.indexUrl.endsWith('/') ? s.indexUrl : s.indexUrl + '/'
 
           discovered = []
           for (const a of anchors) {
@@ -82,7 +86,7 @@ const fastapiProvider: Provider = {
             if (!href) continue
 
             const clean = href.split('#')[0]
-            if (!clean || clean === `/${s.urlPrefix}/` || clean === `/${s.urlPrefix}`) continue
+            if (!clean) continue
 
             let full: string
             if (clean.startsWith('http')) {
@@ -91,14 +95,14 @@ const fastapiProvider: Provider = {
               full = `${BASE_URL}${clean}`
             } else {
               // Relative URL — resolve against the index page URL
-              full = `${s.indexUrl}${clean}`
+              full = new URL(clean, sectionBase).href
             }
 
-            // Normalize: ensure trailing slash and deduplicate
+            // Normalize: ensure trailing slash
             full = full.endsWith('/') ? full : full + '/'
 
-            // Only include URLs that are under the reference section
-            if (full.includes(`/${s.urlPrefix}/`) && full !== s.indexUrl) {
+            // Only include URLs strictly under the reference section (not the index itself)
+            if (full.startsWith(sectionBase) && full !== sectionBase) {
               discovered.push(full)
             }
           }
