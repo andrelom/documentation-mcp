@@ -1,5 +1,7 @@
 # documentation-mcp
 
+> ⚡ This project is **vibecoded** — built with vibes, AI assistance, and good intentions.
+
 A generic, multi-provider MCP server that scrapes, caches, and serves documentation from any site via [Model Context Protocol](https://modelcontextprotocol.io) tools.
 
 Out of the box it ships with a **Fabric.js** provider — but adding support for FastAPI, SQLAlchemy, Zustand, or any other library is as simple as creating a new folder under `src/providers/`.
