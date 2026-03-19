@@ -45,14 +45,17 @@ services:
       - SCRAPER_DELAY_MS=250
       - SCRAPER_TIMEOUT_MS=15000
       - USE_PLAYWRIGHT=false
-    ports:
-      - '3000:3000'
     volumes:
       - ./docker/fabric-mcp:/data/cache
     networks:
       - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.documentation-mcp.rule=Host(`documentation-mcp.localhost`)
+      - traefik.http.routers.documentation-mcp.entrypoints=web
+      - traefik.http.services.documentation-mcp.loadbalancer.server.port=3000
     healthcheck:
-      test: ['CMD', 'wget', '-qO-', 'http://localhost:3001/health']
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3000/health']
       interval: 30s
       timeout: 10s
       retries: 3
