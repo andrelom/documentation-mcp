@@ -46,7 +46,7 @@ services:
       - SCRAPER_TIMEOUT_MS=15000
       - USE_PLAYWRIGHT=false
     volumes:
-      - ./docker/fabric-mcp:/data/cache
+      - ./docker/cache:/data/cache
     networks:
       - proxy
     labels:
